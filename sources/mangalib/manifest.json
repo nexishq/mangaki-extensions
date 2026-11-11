@@ -7,5 +7,5 @@
   "bundle": "sources/mangalib/source.js",
   "icon": "sources/mangalib/icon.png",
   "baseURL": "https://mangalib.me",
-  "description": "Major Russian manga aggregator (TODO: port from native)"
+  "description": "Major Russian manga aggregator"
 }

@@ -21,7 +21,7 @@
       "bundle": "sources/mangalib/source.js",
       "icon": "sources/mangalib/icon.png",
       "baseURL": "https://mangalib.me",
-      "description": "Major Russian manga aggregator (TODO: port from native)"
+      "description": "Major Russian manga aggregator"
     },
     {
       "id": "ranobelib",
@@ -54,7 +54,7 @@
       "bundle": "sources/senkognito/source.js",
       "icon": "sources/senkognito/icon.png",
       "baseURL": "https://senkognito.com",
-      "description": "Senkuro successor — same backend, separate catalog (TODO)"
+      "description": "Senkuro sister catalog on the same backend"
     },
     {
       "id": "senkuro",
@@ -65,7 +65,7 @@
       "bundle": "sources/senkuro/source.js",
       "icon": "sources/senkuro/icon.png",
       "baseURL": "https://senkuro.com",
-      "description": "Russian manga catalog with reader and library sync (TODO: port from native, needs DDoS-Guard)"
+      "description": "Russian manga catalog with reader and library sync"
     }
   ]
 }

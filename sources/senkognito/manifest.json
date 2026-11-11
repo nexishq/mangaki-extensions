@@ -7,5 +7,5 @@
   "bundle": "sources/senkognito/source.js",
   "icon": "sources/senkognito/icon.png",
   "baseURL": "https://senkognito.com",
-  "description": "Senkuro successor — same backend, separate catalog (TODO)"
+  "description": "Senkuro sister catalog on the same backend"
 }
