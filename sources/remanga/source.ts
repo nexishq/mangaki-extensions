@@ -109,9 +109,11 @@ class RemangaSource implements Source {
     const res = await call(`${path}?${params.toString()}`);
     const body = JSON.parse(res.body) as CatalogResponse;
     let items: MangaSummary[] = (body.results ?? []).map(toSummary);
-    if (filter.rating.exclude.includes("EXPLICIT")) {
-      items = (await withAges(items)).filter((i) => i.ageRating !== "EXPLICIT");
-    }
+    // Search results always get ages (cover badges); the catalog only pays
+    // for the extra requests when 18+ has to be filtered out.
+    const hideExplicit = filter.rating.exclude.includes("EXPLICIT");
+    if (filter.query || hideExplicit) items = await withAges(items);
+    if (hideExplicit) items = items.filter((i) => i.ageRating !== "EXPLICIT");
     // Catalog paginates with `next`, search with `meta.total_pages`. A page
     // whose titles were all 18+ is empty after filtering but not the end.
     const hasMore = (body.results?.length ?? 0) > 0 && (body.meta?.total_pages != null

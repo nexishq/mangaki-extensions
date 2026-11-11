@@ -123,7 +123,7 @@ class SenkuroSource implements Source {
 
   async mangaList(filter: MangaFilter, cursor: string | null): Promise<MangaPage> {
     if (filter.query) {
-      return this.tachiyomiTextSearch(filter.query, cursor);
+      return this.tachiyomiTextSearch(filter.query, cursor, filter.rating.exclude.includes("EXPLICIT"));
     }
     const labelInclude = filter.labels.include.slice();
     const labelExclude = filter.labels.exclude.slice();
@@ -222,18 +222,45 @@ class SenkuroSource implements Source {
 
   // MARK: - Tachiyomi-search fallback (free-text query)
 
-  private async tachiyomiTextSearch(query: string, cursor: string | null): Promise<MangaPage> {
+  /// Free text goes through the Tachiyomi search — the catalog's `search`
+  /// argument misses most queries. That endpoint returns titles only, so one
+  /// aliased follow-up query fills in type, age rating and score for the
+  /// whole page (cover badges, and the hide-18+ setting).
+  private async tachiyomiTextSearch(query: string, cursor: string | null, hideExplicit: boolean): Promise<MangaPage> {
     const offset = cursor ? parseInt(cursor, 10) : 0;
     const data = await this.graphQL<{ mangaTachiyomiSearch: { mangas: GQLNode[] } }>(
       Q_TEXT_SEARCH, { query, offset }
     );
-    const items = data.mangaTachiyomiSearch.mangas.map(nodeToSummary);
-    const hasMore = items.length >= PAGE_SIZE;
+    const found = data.mangaTachiyomiSearch.mangas;
+    const facts = await this.mangaFacts(found.map((m) => m.slug));
+    let items = found.map((m) => nodeToSummary({ ...m, ...facts.get(m.slug) }));
+    if (hideExplicit) items = items.filter((i) => i.ageRating !== "EXPLICIT");
+    const hasMore = found.length >= PAGE_SIZE;
     return {
       items,
-      endCursor: hasMore ? String(offset + items.length) : undefined,
+      endCursor: hasMore ? String(offset + found.length) : undefined,
       hasMore,
     };
+  }
+
+  private async mangaFacts(slugs: string[]): Promise<Map<string, Partial<GQLNode>>> {
+    const facts = new Map<string, Partial<GQLNode>>();
+    if (slugs.length === 0) return facts;
+    const params = slugs.map((_, i) => `$s${i}: String!`).join(", ");
+    const fields = slugs
+      .map((_, i) => `m${i}: manga(slug: $s${i}) { slug type status rating formats score }`)
+      .join(" ");
+    try {
+      const data = await this.graphQL<Record<string, Partial<GQLNode> | null>>(
+        `query mangaFacts(${params}) { ${fields} }`,
+        Object.fromEntries(slugs.map((slug, i) => [`s${i}`, slug])),
+      );
+      for (const node of Object.values(data)) if (node?.slug) facts.set(node.slug, node);
+    } catch (e) {
+      // Badges are a nicety — plain results beat a failed search.
+      host.log(`senkuro: search facts failed: ${e}`);
+    }
+    return facts;
   }
 
   // MARK: - GraphQL transport (DDoS-Guard aware)

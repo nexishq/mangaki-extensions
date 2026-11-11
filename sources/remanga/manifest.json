@@ -1,7 +1,7 @@
 {
   "id": "remanga",
   "name": "Remanga",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "language": "ru",
   "nsfw": false,
   "bundle": "sources/remanga/source.js",

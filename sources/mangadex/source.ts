@@ -62,6 +62,27 @@ function originalTitle(attrs: MDXManga["attributes"]): string | undefined {
   return all.find((t) => t[`${lang}-ro`])?.[`${lang}-ro`] ?? all.find((t) => t[lang])?.[lang];
 }
 
+/// Bayesian ratings for a page of titles in one request — the list endpoint
+/// has none, and covers show the score badge.
+async function ratings(ids: string[]): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (ids.length === 0) return out;
+  const params = new QueryBuilder();
+  for (const id of ids) params.append("manga[]", id);
+  try {
+    const res = await host.fetch(`${API}/statistics/manga?${params.toString()}`);
+    if (res.status >= 300) return out;
+    const body = JSON.parse(res.body) as { statistics?: Record<string, { rating?: { bayesian?: number | null } }> };
+    for (const [id, stat] of Object.entries(body.statistics ?? {})) {
+      const score = stat.rating?.bayesian;
+      if (typeof score === "number" && score > 0) out.set(id, Math.round(score * 100) / 100);
+    }
+  } catch (e) {
+    host.log(`mangadex: statistics failed: ${e}`);
+  }
+  return out;
+}
+
 class MangaDexSource implements Source {
   async mangaList(filter: MangaFilter, cursor: string | null): Promise<MangaPage> {
     const offset = cursor ? parseInt(cursor, 10) : 0;
@@ -86,7 +107,8 @@ class MangaDexSource implements Source {
 
     const json = JSON.parse(res.body) as MDXListResponse;
     const lang = preferredLang();
-    const items: MangaSummary[] = json.data.map((m) => toSummary(m, lang));
+    const scores = await ratings(json.data.map((m) => m.id));
+    const items: MangaSummary[] = json.data.map((m) => ({ ...toSummary(m, lang), rating: scores.get(m.id) }));
 
     return {
       items,
