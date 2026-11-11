@@ -10,7 +10,10 @@ import { LIB_DETAIL_FIELDS, libDetails, type LibDetailPayload } from "../../src/
 // same backend (api2.mangalib.me) and only differ by `site_id`.
 // REST JSON API, no auth required for public titles.
 const API = "https://api2.mangalib.me";
-const IMAGE_HOST = "https://img3.mixlib.me";
+// The "main" image server from /api/constants (imageServers). It refuses
+// requests without the site's Referer; img3.mixlib.me is gone (503).
+const IMAGE_HOST = "https://img2.imglib.info";
+const IMAGE_HEADERS = { Referer: "https://mangalib.me/" };
 const SITE_ID = 1;  // 1 = mangalib, 2 = hentailib, 3 = yaoilib
 
 function sortField(sort: string): string {
@@ -141,6 +144,7 @@ class MangalibSource implements Source {
       remoteURL: `${IMAGE_HOST}${p.url}`,
       width: p.width,
       height: p.height,
+      headers: IMAGE_HEADERS,
     }));
   }
 }

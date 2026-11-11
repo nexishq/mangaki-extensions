@@ -269,6 +269,9 @@ function toSummary(m: MDXManga, lang: string): MangaSummary {
     type,
     ageRating: m.attributes.contentRating ? RATING_MAP[m.attributes.contentRating] : undefined,
     formats: [],
+    // uploads.mangadex.org answers browser-like User-Agents with a redirect
+    // to a placeholder; an honest client UA gets the real cover.
+    coverHeaders: { "User-Agent": "Mangaki/1.0 (iOS)" },
   };
 }
 

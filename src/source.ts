@@ -37,6 +37,10 @@ export interface MangaSummary {
   type?: MangaType;
   ageRating?: AgeRating;
   formats?: string[];
+  // Headers the native image loader sends for this cover's host
+  // (Referer / User-Agent for hot-link protected CDNs). The app falls back
+  // to the manifest's baseURL as Referer.
+  coverHeaders?: Record<string, string>;
 }
 
 export interface MangaPage {

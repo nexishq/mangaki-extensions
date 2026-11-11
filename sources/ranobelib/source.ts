@@ -17,7 +17,10 @@ import { LIB_DETAIL_FIELDS, libDetails, type LibDetailPayload } from "../../src/
 const API = "https://api2.mangalib.me";
 const SITE_ID = 3;
 const COVER_HOST = "https://cover.imglib.info";
-const IMAGE_HOST = "https://img3.mixlib.me";
+// The "main" image server from /api/constants (imageServers). It refuses
+// requests without the site's Referer; img3.mixlib.me is gone (503).
+const IMAGE_HOST = "https://img2.imglib.info";
+const IMAGE_HEADERS = { Referer: "https://ranobelib.me/" };
 
 function sortField(sort: string): string {
   switch (sort) {
@@ -128,6 +131,7 @@ class RanobelibSource implements Source {
       remoteURL: `${IMAGE_HOST}${p.url}`,
       width: p.width,
       height: p.height,
+      headers: IMAGE_HEADERS,
     }));
   }
 
