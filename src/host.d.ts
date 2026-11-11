@@ -11,7 +11,7 @@ interface HostFetchResponse {
 interface HostFetchInit {
   method?: "GET" | "POST" | "PUT" | "DELETE";
   /// Cookies are never attached or stored implicitly — pass a `Cookie`
-  /// header yourself (e.g. the value from `solveDDoSGuard`).
+  /// header yourself (e.g. the value from `solveChallenge`).
   headers?: Record<string, string>;
   body?: string;
   /// "base64" returns binary bodies base64-encoded. Default is UTF-8 text;
@@ -19,7 +19,7 @@ interface HostFetchInit {
   encoding?: "text" | "base64";
 }
 
-interface DDoSGuardResult {
+interface ChallengeResult {
   /// Cookie header value to attach to subsequent requests (or empty
   /// string if no challenge was needed).
   cookies: string;
@@ -36,7 +36,7 @@ interface Host {
   /// native side and harvesting the cookies it sets. Sources that hit a
   /// guard-protected origin should call this before their first fetch
   /// and pass the returned cookie value as a `Cookie` request header.
-  solveDDoSGuard(domain: string): Promise<DDoSGuardResult>;
+  solveChallenge(domain: string): Promise<ChallengeResult>;
 
   /// Forwarded to the iOS unified log (subsystem `app.mangaki.ios`,
   /// category `Extension <id>`). Useful while developing — leaves

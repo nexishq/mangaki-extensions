@@ -119,7 +119,7 @@ class SenkuroSource implements Source {
   // Cached DDoS-Guard cookie value, attached to every GraphQL request
   // once obtained. The native bridge can also persist cookies in
   // HTTPCookieStorage, but explicit pass-through avoids relying on that.
-  private ddosCookies = "";
+  private challengeCookies = "";
 
   async mangaList(filter: MangaFilter, cursor: string | null): Promise<MangaPage> {
     if (filter.query) {
@@ -274,7 +274,7 @@ class SenkuroSource implements Source {
         "User-Agent": "Mozilla/5.0 (iPhone) Mangaki/0.1",
         "Referer": this.referer,
       };
-      if (this.ddosCookies) headers["Cookie"] = this.ddosCookies;
+      if (this.challengeCookies) headers["Cookie"] = this.challengeCookies;
 
       const res = await host.fetch(this.endpoint, {
         method: "POST",
@@ -283,8 +283,8 @@ class SenkuroSource implements Source {
       });
 
       if (res.status === 403 && attempt === 0) {
-        const { cookies } = await host.solveDDoSGuard(this.webHost);
-        this.ddosCookies = cookies;
+        const { cookies } = await host.solveChallenge(this.webHost);
+        this.challengeCookies = cookies;
         attempt++;
         continue;
       }

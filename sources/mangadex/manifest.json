@@ -1,11 +1,16 @@
 {
   "id": "mangadex",
   "name": "MangaDex",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "language": "multi",
   "nsfw": false,
   "bundle": "sources/mangadex/source.js",
   "icon": "sources/mangadex/icon.png",
   "baseURL": "https://mangadex.org",
-  "description": "Open multi-language scanlation aggregator (community)"
+  "description": "Open multi-language scanlation aggregator (community)",
+  "imageHeaders": {
+    "uploads.mangadex.org": {
+      "User-Agent": "Mangaki/1.0 (iOS)"
+    }
+  }
 }
