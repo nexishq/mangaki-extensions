@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "mangadex",
+      "name": "MangaDex",
+      "version": "0.1.0",
+      "language": "multi",
+      "nsfw": false,
+      "bundle": "sources/mangadex/source.js",
+      "icon": "sources/mangadex/icon.png",
+      "baseURL": "https://mangadex.org",
+      "description": "Open multi-language scanlation aggregator (community)"
+    },
+    {
+      "id": "mangalib",
+      "name": "Mangalib",
+      "version": "0.1.0",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/mangalib/source.js",
+      "icon": "sources/mangalib/icon.png",
+      "baseURL": "https://mangalib.me",
+      "description": "Major Russian manga aggregator (TODO: port from native)"
+    },
+    {
+      "id": "ranobelib",
+      "name": "Ranobelib",
+      "version": "0.1.0",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/ranobelib/source.js",
+      "icon": "sources/ranobelib/icon.png",
+      "baseURL": "https://ranobelib.me",
+      "description": "Major Russian light novel translation aggregator"
+    },
+    {
+      "id": "remanga",
+      "name": "Remanga",
+      "version": "0.2.0",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/remanga/source.js",
+      "icon": "sources/remanga/icon.png",
+      "baseURL": "https://remanga.org",
+      "description": "Russian aggregator with team translations"
+    },
+    {
+      "id": "senkognito",
+      "name": "Senkognito",
+      "version": "0.1.0",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/senkognito/source.js",
+      "icon": "sources/senkognito/icon.png",
+      "baseURL": "https://senkognito.com",
+      "description": "Senkuro successor — same backend, separate catalog (TODO)"
+    },
+    {
+      "id": "senkuro",
+      "name": "Senkuro",
+      "version": "0.1.0",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/senkuro/source.js",
+      "icon": "sources/senkuro/icon.png",
+      "baseURL": "https://senkuro.com",
+      "description": "Russian manga catalog with reader and library sync (TODO: port from native, needs DDoS-Guard)"
+    }
+  ]
+}

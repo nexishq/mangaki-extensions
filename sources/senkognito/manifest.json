@@ -1,0 +1,11 @@
+{
+  "id": "senkognito",
+  "name": "Senkognito",
+  "version": "0.1.0",
+  "language": "ru",
+  "nsfw": false,
+  "bundle": "sources/senkognito/source.js",
+  "icon": "sources/senkognito/icon.png",
+  "baseURL": "https://senkognito.com",
+  "description": "Senkuro successor — same backend, separate catalog (TODO)"
+}

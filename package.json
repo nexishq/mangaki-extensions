@@ -1,0 +1,15 @@
+{
+  "name": "mangaki-extensions",
+  "version": "0.1.0",
+  "description": "Manga source extensions for the Mangaki iOS app",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "typescript": "^5.4.0"
+  }
+}

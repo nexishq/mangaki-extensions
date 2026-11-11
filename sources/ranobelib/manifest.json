@@ -1,0 +1,11 @@
+{
+  "id": "ranobelib",
+  "name": "Ranobelib",
+  "version": "0.1.0",
+  "language": "ru",
+  "nsfw": false,
+  "bundle": "sources/ranobelib/source.js",
+  "icon": "sources/ranobelib/icon.png",
+  "baseURL": "https://ranobelib.me",
+  "description": "Major Russian light novel translation aggregator"
+}

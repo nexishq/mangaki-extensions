@@ -1,0 +1,11 @@
+{
+  "id": "remanga",
+  "name": "Remanga",
+  "version": "0.2.0",
+  "language": "ru",
+  "nsfw": false,
+  "bundle": "sources/remanga/source.js",
+  "icon": "sources/remanga/icon.png",
+  "baseURL": "https://remanga.org",
+  "description": "Russian aggregator with team translations"
+}
