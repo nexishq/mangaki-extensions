@@ -30,8 +30,9 @@ const TYPE_MAP: Record<string, number> = {
 const STATUS_MAP: Record<string, number> = {
   ONGOING: 2, FINISHED: 1, ANNOUNCE: 5, HIATUS: 3,
 };
+// Remanga only has 0 (all ages), 1 (16+) and 2 (18+).
 const AGE_MAP: Record<string, number> = {
-  GENERAL: 0, SENSITIVE: 1, QUESTIONABLE: 1, EXPLICIT: 2,
+  QUESTIONABLE: 1, EXPLICIT: 2,
 };
 
 const STATUS_INV: Record<number, MangaStatus> = {
@@ -41,8 +42,45 @@ const TYPE_INV: Record<number, MangaType> = {
   1: "manga", 2: "manhwa", 3: "manhua", 4: "oel", 5: "comic", 6: "comic", 7: "other", 22: "other",
 };
 const AGE_INV: Record<number, AgeRating> = {
-  0: "GENERAL", 1: "SENSITIVE", 2: "EXPLICIT",
+  0: "GENERAL", 1: "QUESTIONABLE", 2: "EXPLICIT",
 };
+
+// The catalog and search endpoints carry no age rating, and the API can't
+// be asked for "0+ and 16+ only" (`age_limit=0` is read as "no filter"). So
+// while 18+ is hidden, each title's age comes from its detail page. Cached
+// per dir for the life of the extension; looked up a few at a time.
+const AGE_LOOKUP_CONCURRENCY = 6;
+const ageCache = new Map<string, number | null>();
+
+async function ageOf(dir: string): Promise<number | null> {
+  if (ageCache.has(dir)) return ageCache.get(dir) ?? null;
+  let age: number | null = null;
+  try {
+    age = ageID(await title(dir)) ?? null;
+  } catch {
+    age = null; // unknown: keep the title rather than hide it on a hiccup
+  }
+  ageCache.set(dir, age);
+  return age;
+}
+
+async function withAges(items: MangaSummary[]): Promise<MangaSummary[]> {
+  const out: MangaSummary[] = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      const age = await ageOf(items[i].remoteID);
+      out[i] = age == null ? items[i] : {
+        ...items[i],
+        ageRating: AGE_INV[age],
+        nsfw: (items[i].nsfw ?? false) || age >= 2,
+      };
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(AGE_LOOKUP_CONCURRENCY, items.length) }, worker));
+  return out;
+}
 
 class RemangaSource implements Source {
   async mangaList(filter: MangaFilter, cursor: string | null): Promise<MangaPage> {
@@ -70,9 +108,13 @@ class RemangaSource implements Source {
     const path = filter.query ? "/api/v2/search/" : "/api/v2/search/catalog/";
     const res = await call(`${path}?${params.toString()}`);
     const body = JSON.parse(res.body) as CatalogResponse;
-    const items: MangaSummary[] = (body.results ?? []).map(toSummary);
-    // Catalog paginates with `next`, search with `meta.total_pages`.
-    const hasMore = items.length > 0 && (body.meta?.total_pages != null
+    let items: MangaSummary[] = (body.results ?? []).map(toSummary);
+    if (filter.rating.exclude.includes("EXPLICIT")) {
+      items = (await withAges(items)).filter((i) => i.ageRating !== "EXPLICIT");
+    }
+    // Catalog paginates with `next`, search with `meta.total_pages`. A page
+    // whose titles were all 18+ is empty after filtering but not the end.
+    const hasMore = (body.results?.length ?? 0) > 0 && (body.meta?.total_pages != null
       ? body.meta.total_pages > page
       : body.next != null);
     return {

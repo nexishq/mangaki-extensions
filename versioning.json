@@ -4,7 +4,7 @@
     {
       "id": "mangadex",
       "name": "MangaDex",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "language": "multi",
       "nsfw": false,
       "bundle": "sources/mangadex/source.js",
@@ -15,7 +15,7 @@
     {
       "id": "mangalib",
       "name": "Mangalib",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "language": "ru",
       "nsfw": false,
       "bundle": "sources/mangalib/source.js",
@@ -26,7 +26,7 @@
     {
       "id": "ranobelib",
       "name": "Ranobelib",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "language": "ru",
       "nsfw": false,
       "bundle": "sources/ranobelib/source.js",
@@ -37,7 +37,7 @@
     {
       "id": "remanga",
       "name": "Remanga",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "language": "ru",
       "nsfw": false,
       "bundle": "sources/remanga/source.js",

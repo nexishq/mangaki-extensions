@@ -1,7 +1,7 @@
 {
   "id": "mangalib",
   "name": "Mangalib",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "language": "ru",
   "nsfw": false,
   "bundle": "sources/mangalib/source.js",

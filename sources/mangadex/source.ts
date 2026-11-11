@@ -63,7 +63,9 @@ class MangaDexSource implements Source {
     params.append("includes[]", "cover_art");
     params.append("contentRating[]", "safe");
     params.append("contentRating[]", "suggestive");
-    params.append("contentRating[]", "erotica");
+    // The app puts EXPLICIT into rating.exclude while 18+ is hidden; erotica
+    // is adult-only too, so leave it out rather than drop it client-side.
+    if (!filter.rating.exclude.includes("EXPLICIT")) params.append("contentRating[]", "erotica");
     params.append(`order[${mdxSortField(filter.sort)}]`, "desc");
 
     if (filter.query) params.append("title", filter.query);

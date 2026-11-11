@@ -38,7 +38,7 @@ const TYPE_INV: Record<number, MangaType> = {
   1: "manga", 4: "oel", 5: "manhwa", 6: "manhua", 8: "other", 9: "comic",
 };
 const AGE_INV: Record<number, AgeRating> = {
-  0: "GENERAL", 1: "SENSITIVE", 2: "QUESTIONABLE", 3: "EXPLICIT",
+  0: "GENERAL", 1: "GENERAL", 2: "SENSITIVE", 3: "QUESTIONABLE", 4: "EXPLICIT", 5: "EXPLICIT",
 };
 
 class RanobelibSource implements Source {
@@ -352,7 +352,7 @@ function toSummary(m: Manga): MangaSummary {
     title: bestTitle(m),
     coverURL: cover,
     rating: !Number.isNaN(ratingVal) && ratingVal > 0 ? ratingVal : undefined,
-    nsfw: m.ageRestriction?.id === 3,
+    nsfw: (m.ageRestriction?.id ?? 0) >= 4,
     status: m.status ? STATUS_INV[m.status.id] : undefined,
     type: m.type ? TYPE_INV[m.type.id] : undefined,
     ageRating: m.ageRestriction ? AGE_INV[m.ageRestriction.id] : undefined,
