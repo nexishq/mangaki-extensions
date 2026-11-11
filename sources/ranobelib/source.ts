@@ -4,6 +4,7 @@ import type {
   ChapterDTO, PageDTO, MangaStatus, MangaType, AgeRating,
 } from "../../src/source";
 import { qs } from "../../src/util";
+import { LIB_DETAIL_FIELDS, libDetails, type LibDetailPayload } from "../../src/lib";
 
 // Ranobelib is part of the "Lib" family — same backend (api2.mangalib.me)
 // as Mangalib, just `site_id=3`. Returns Russian translations of mostly
@@ -63,21 +64,10 @@ class RanobelibSource implements Source {
   }
 
   async mangaDetails(slug: string): Promise<MangaDetails> {
-    const fields = ["summary", "genres", "tags", "authors", "artists", "publisher", "rate_avg"];
-    const query = fields.map((f) => `fields%5B%5D=${f}`).join("&");
+    const query = LIB_DETAIL_FIELDS.map((f) => `fields%5B%5D=${f}`).join("&");
     const res = await call(`/api/manga/${encodeURIComponent(slug)}?${query}`);
-    const body = JSON.parse(res.body) as { data: Manga };
-    const m = body.data;
-    return {
-      summary: toSummary(m),
-      titleAlt: [m.eng_name, m.name].filter(nonEmpty).join(" / ") || undefined,
-      titleOriginal: m.name ?? undefined,
-      description: m.summary ?? undefined,
-      author: (m.authors ?? []).map((a) => a.name).filter(nonEmpty).join(", ") || undefined,
-      artist: (m.artists ?? []).map((a) => a.name).filter(nonEmpty).join(", ") || undefined,
-      genres: (m.genres ?? []).map((g) => g.name).filter(nonEmpty) as string[],
-      tags: [],
-    };
+    const m = (JSON.parse(res.body) as { data: Manga & LibDetailPayload }).data;
+    return libDetails(m, toSummary(m));
   }
 
   async chapters(mangaID: string): Promise<ChapterDTO[]> {
@@ -217,10 +207,6 @@ interface Manga {
   type?: { id: number; label?: string; name?: string } | null;
   ageRestriction?: { id: number } | null;
   rating?: { average?: string | null; votes?: number | null } | null;
-  summary?: string | null;
-  genres?: { id: number; name?: string }[];
-  authors?: { id: number; name?: string }[];
-  artists?: { id: number; name?: string }[];
 }
 interface ListResponse {
   data: Manga[];
@@ -358,9 +344,6 @@ function toSummary(m: Manga): MangaSummary {
     ageRating: m.ageRestriction ? AGE_INV[m.ageRestriction.id] : undefined,
     formats: [],
   };
-}
-function nonEmpty(s: string | null | undefined): s is string {
-  return typeof s === "string" && s.length > 0;
 }
 
 export default RanobelibSource;

@@ -4,6 +4,7 @@ import type {
   ChapterDTO, PageDTO, MangaStatus, MangaType, AgeRating,
 } from "../../src/source";
 import { QueryBuilder, qs } from "../../src/util";
+import { LIB_DETAIL_FIELDS, libDetails, type LibDetailPayload } from "../../src/lib";
 
 // Mangalib family — mangalib.me, yaoilib.me, hentailib.org share the
 // same backend (api2.mangalib.me) and only differ by `site_id`.
@@ -77,22 +78,10 @@ class MangalibSource implements Source {
   async mangaDetails(slug: string): Promise<MangaDetails> {
     const params = new QueryBuilder();
     params.append("site_id", String(SITE_ID));
-    for (const f of ["summary", "genres", "tags", "authors", "artists", "publisher", "rate_avg"]) {
-      params.append("fields[]", f);
-    }
+    for (const f of LIB_DETAIL_FIELDS) params.append("fields[]", f);
     const res = await call(`/api/manga/${encodeURIComponent(slug)}?${params.toString()}`);
-    const body = JSON.parse(res.body) as { data: Manga };
-    const m = body.data;
-    return {
-      summary: toSummary(m),
-      titleAlt: [m.eng_name, m.name].filter(nonEmpty).join(" / ") || undefined,
-      titleOriginal: m.name ?? undefined,
-      description: m.summary ?? undefined,
-      author: (m.authors ?? []).map((a) => a.name).filter(nonEmpty).join(", ") || undefined,
-      artist: (m.artists ?? []).map((a) => a.name).filter(nonEmpty).join(", ") || undefined,
-      genres: (m.genres ?? []).map((g) => g.name).filter(nonEmpty) as string[],
-      tags: [],
-    };
+    const m = (JSON.parse(res.body) as { data: Manga & LibDetailPayload }).data;
+    return libDetails(m, toSummary(m));
   }
 
   async chapters(mangaID: string): Promise<ChapterDTO[]> {
@@ -164,6 +153,8 @@ async function call(path: string): Promise<HostFetchResponse> {
       "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X) Mangaki/0.1",
       "Accept": "application/json",
       "Referer": "https://mangalib.me/",
+      // Without it the detail endpoint drops authors and other fields.
+      "Site-Id": String(SITE_ID),
     },
   });
   if (res.status === 404) throw new Error("Not found");
@@ -184,10 +175,6 @@ interface Manga {
   type?: { id: number; label?: string; name?: string } | null;
   ageRestriction?: { id: number } | null;
   rating?: { average?: string | null; votes?: number | null } | null;
-  summary?: string | null;
-  genres?: { id: number; name?: string }[];
-  authors?: { id: number; name?: string }[];
-  artists?: { id: number; name?: string }[];
 }
 
 interface ListResponse {
@@ -234,8 +221,5 @@ function toSummary(m: Manga): MangaSummary {
   };
 }
 
-function nonEmpty(s: string | null | undefined): s is string {
-  return typeof s === "string" && s.length > 0;
-}
 
 export default MangalibSource;

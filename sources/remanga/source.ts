@@ -3,7 +3,7 @@ import type {
   Source, MangaFilter, MangaPage, MangaSummary, MangaDetails,
   ChapterDTO, PageDTO, MangaStatus, MangaType, AgeRating,
 } from "../../src/source";
-import { QueryBuilder, qs } from "../../src/util";
+import { QueryBuilder, htmlToText, qs, uniqueStrings } from "../../src/util";
 
 // Remanga — major Russian aggregator. REST API v2 at api.remanga.org
 // (the v1 catalog/title/chapter endpoints now return 404).
@@ -129,10 +129,13 @@ class RemangaSource implements Source {
     const m = await title(slug);
     return {
       summary: toSummary(m),
-      titleAlt: [m.secondary_name, m.another_name].filter(nonEmpty).join(" / ") || undefined,
+      titleAlt: uniqueStrings([m.secondary_name, m.another_name]).join(" / ") || undefined,
       titleOriginal: m.secondary_name ?? undefined,
-      // Remanga ships descriptions as editor HTML — strip tags.
-      description: m.description ? stripHTML(m.description) : undefined,
+      // Remanga ships descriptions as editor HTML.
+      description: m.description ? htmlToText(m.description) : undefined,
+      author: creators(m, 1),
+      artist: creators(m, 2),
+      publisher: creators(m, 3),
       year: num(m.issue_year),
       genres: [...(m.genres ?? []), ...(m.categories ?? [])].map((g) => g.name).filter(nonEmpty),
       tags: [],
@@ -239,6 +242,7 @@ interface ApiManga {
   main_name?: string | null;       // Russian title
   secondary_name?: string | null;  // English / romanized title
   another_name?: string | null;
+  creators?: { name?: string | null; type?: number | null }[] | null;
   description?: string | null;
   cover?: { low?: string | null; mid?: string | null; high?: string | null } | null;
   status?: NamedID | null;
@@ -291,7 +295,8 @@ function bestTitle(m: ApiManga): string {
 }
 
 // Some new titles get a "<DD.MM.YYYY>" prefix in `dir` until they go
-// free. The public URL slug strips that prefix.
+// free. The public URL slug strips that prefix, but the API only knows the
+// full `dir` — so it stays the remoteID and only the web slug is cleaned.
 function cleanedDir(dir: string | undefined): string {
   if (!dir) return "";
   if (dir.startsWith("<")) {
@@ -329,11 +334,10 @@ function ageID(m: ApiManga): number | undefined {
 }
 
 function toSummary(m: ApiManga): MangaSummary {
-  const dir = cleanedDir(m.dir);
   const age = ageID(m);
   return {
-    remoteID: dir,
-    slug: dir,
+    remoteID: m.dir ?? "",
+    slug: cleanedDir(m.dir),
     title: bestTitle(m),
     coverURL: coverURL(m),
     rating: rating(m.avg_rating),
@@ -350,18 +354,9 @@ function nonEmpty(s: string | null | undefined): s is string {
   return typeof s === "string" && s.length > 0;
 }
 
-/// Minimal HTML stripper for Remanga descriptions. Removes tags, decodes
-/// `&amp; &lt; &gt; &quot; &nbsp;` — what their editor actually emits.
-function stripHTML(input: string): string {
-  return input
-    .replace(/<[^>]+>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#39;/g, "'")
-    .trim();
+/// Creator type: 1 author, 2 artist, 3 publishing platform (Naver, Kakao…).
+function creators(m: ApiManga, type: number): string | undefined {
+  return uniqueStrings((m.creators ?? []).filter((c) => c.type === type).map((c) => c.name)).join(", ") || undefined;
 }
 
 export default RemangaSource;

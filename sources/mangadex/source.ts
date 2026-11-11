@@ -11,7 +11,7 @@ import type {
   MangaType,
   AgeRating,
 } from "../../src/source";
-import { QueryBuilder } from "../../src/util";
+import { QueryBuilder, uniqueStrings } from "../../src/util";
 
 // MangaDex REST API. Documented at https://api.mangadex.org/docs/.
 // No auth required for public content.
@@ -52,6 +52,14 @@ function mdxSortField(sort: string): string {
 function pickLocalized(map: Record<string, string> | undefined, lang: string): string | undefined {
   if (!map) return undefined;
   return map[lang] ?? map["en"] ?? Object.values(map)[0];
+}
+
+/// The title in the work's own language (romanized variant preferred).
+function originalTitle(attrs: MDXManga["attributes"]): string | undefined {
+  const lang = attrs.originalLanguage;
+  if (!lang) return undefined;
+  const all = attrs.altTitles ?? [];
+  return all.find((t) => t[`${lang}-ro`])?.[`${lang}-ro`] ?? all.find((t) => t[lang])?.[lang];
 }
 
 class MangaDexSource implements Source {
@@ -98,10 +106,14 @@ class MangaDexSource implements Source {
     const json = JSON.parse(res.body) as { data: MDXManga };
     const lang = preferredLang();
     const summary = toSummary(json.data, lang);
+    const attrs = json.data.attributes;
     return {
       summary,
-      titleAlt: undefined,
-      titleOriginal: pickLocalized(json.data.attributes.altTitles?.[0], "ja"),
+      titleAlt: uniqueStrings((attrs.altTitles ?? []).flatMap((t) => Object.values(t)))
+        .filter((t) => t !== summary.title)
+        .slice(0, 12)
+        .join(" / ") || undefined,
+      titleOriginal: originalTitle(attrs),
       description: pickLocalized(json.data.attributes.description, lang),
       author: extractRelationship(json.data, "author"),
       artist: extractRelationship(json.data, "artist"),
