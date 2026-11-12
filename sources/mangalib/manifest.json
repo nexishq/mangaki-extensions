@@ -1,0 +1,19 @@
+{
+  "id": "mangalib",
+  "name": "Mangalib",
+  "version": "0.1.4",
+  "language": "ru",
+  "nsfw": false,
+  "bundle": "sources/mangalib/source.js",
+  "icon": "sources/mangalib/icon.png",
+  "baseURL": "https://mangalib.me",
+  "description": "Major Russian manga aggregator",
+  "imageHeaders": {
+    "cover.imglib.info": {
+      "Referer": "https://mangalib.me/"
+    },
+    "img2.imglib.info": {
+      "Referer": "https://mangalib.me/"
+    }
+  }
+}

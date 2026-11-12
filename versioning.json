@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "mangadex",
+      "name": "MangaDex",
+      "version": "0.1.5",
+      "language": "multi",
+      "nsfw": false,
+      "bundle": "sources/mangadex/source.js",
+      "icon": "sources/mangadex/icon.png",
+      "baseURL": "https://mangadex.org",
+      "description": "Open multi-language scanlation aggregator (community)",
+      "imageHeaders": {
+        "uploads.mangadex.org": {
+          "User-Agent": "Mangaki/1.0 (iOS)"
+        }
+      }
+    },
+    {
+      "id": "mangalib",
+      "name": "Mangalib",
+      "version": "0.1.4",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/mangalib/source.js",
+      "icon": "sources/mangalib/icon.png",
+      "baseURL": "https://mangalib.me",
+      "description": "Major Russian manga aggregator",
+      "imageHeaders": {
+        "cover.imglib.info": {
+          "Referer": "https://mangalib.me/"
+        },
+        "img2.imglib.info": {
+          "Referer": "https://mangalib.me/"
+        }
+      }
+    },
+    {
+      "id": "ranobelib",
+      "name": "Ranobelib",
+      "version": "0.1.4",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/ranobelib/source.js",
+      "icon": "sources/ranobelib/icon.png",
+      "baseURL": "https://ranobelib.me",
+      "description": "Major Russian light novel translation aggregator",
+      "imageHeaders": {
+        "cover.imglib.info": {
+          "Referer": "https://ranobelib.me/"
+        },
+        "img2.imglib.info": {
+          "Referer": "https://ranobelib.me/"
+        }
+      }
+    },
+    {
+      "id": "remanga",
+      "name": "Remanga",
+      "version": "0.2.3",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/remanga/source.js",
+      "icon": "sources/remanga/icon.png",
+      "baseURL": "https://remanga.org",
+      "description": "Russian aggregator with team translations"
+    },
+    {
+      "id": "senkognito",
+      "name": "Senkognito",
+      "version": "0.1.3",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/senkognito/source.js",
+      "icon": "sources/senkognito/icon.png",
+      "baseURL": "https://senkognito.com",
+      "description": "Senkuro sister catalog on the same backend"
+    },
+    {
+      "id": "senkuro",
+      "name": "Senkuro",
+      "version": "0.1.3",
+      "language": "ru",
+      "nsfw": false,
+      "bundle": "sources/senkuro/source.js",
+      "icon": "sources/senkuro/icon.png",
+      "baseURL": "https://senkuro.com",
+      "description": "Russian manga catalog with reader and library sync"
+    }
+  ]
+}
