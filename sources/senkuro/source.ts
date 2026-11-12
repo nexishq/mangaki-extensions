@@ -62,6 +62,14 @@ const Q_CHAPTERS = `
   }
 `;
 
+const Q_RECENT_CHAPTERS = `
+  query fetchRecentChapters($branchId: ID!) {
+    mangaChapters(branchId: $branchId, first: 100) {
+      edges { node { id slug branchId name teamIds number volume createdAt } }
+    }
+  }
+`;
+
 const Q_PAGES = `
   query fetchTachiyomiChapterPages($mangaId: ID!, $chapterId: ID!) {
     mangaTachiyomiChapterPages(mangaId: $mangaId, chapterId: $chapterId) {
@@ -174,7 +182,8 @@ class SenkuroSource implements Source {
     const teams = new Map<string, string>(
       data.mangaTachiyomiChapters.teams.map((t) => [t.id, t.name ?? ""])
     );
-    return data.mangaTachiyomiChapters.chapters.map((c) => ({
+    const chapters = await this.withRecentChapters(data.mangaTachiyomiChapters.chapters);
+    return chapters.map((c) => ({
       id: `${mangaID.split(":")[0] || "senkuro"}:${remote}:${c.id}`,
       remoteID: c.id,
       title: c.name?.length ? c.name : undefined,
@@ -184,6 +193,30 @@ class SenkuroSource implements Source {
       translator: c.teamIds.map((id) => teams.get(id) ?? "").filter(Boolean).join(", ") || undefined,
       publishedAt: c.createdAt,
     }));
+  }
+
+  /// The Tachiyomi chapter list is cached server-side and runs hours to
+  /// days behind the site, so a chapter released today is missing from it.
+  /// The site's own `mangaChapters` query is live but paginated (100 per
+  /// page, newest first): add its first page for every branch on top of
+  /// the full Tachiyomi list. The ids are the same in both.
+  private async withRecentChapters(base: GQLChapters["chapters"]): Promise<GQLChapters["chapters"]> {
+    const branches = [...new Set(base.map((c) => c.branchId).filter((b): b is string => !!b))];
+    const known = new Set(base.map((c) => c.id));
+    const extra: GQLChapters["chapters"] = [];
+    for (const branchId of branches) {
+      try {
+        const data = await this.graphQL<{ mangaChapters: { edges: { node: GQLChapters["chapters"][number] }[] } }>(
+          Q_RECENT_CHAPTERS, { branchId }
+        );
+        for (const { node } of data.mangaChapters.edges) {
+          if (!known.has(node.id)) { known.add(node.id); extra.push(node); }
+        }
+      } catch {
+        // The Tachiyomi list alone is still a valid (if stale) answer.
+      }
+    }
+    return extra.length ? [...extra, ...base] : base;
   }
 
   async pages(chapterID: string): Promise<PageDTO[]> {
