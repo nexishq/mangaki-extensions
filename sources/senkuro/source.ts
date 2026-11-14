@@ -4,8 +4,10 @@ import type {
   ChapterDTO, PageDTO, MangaStatus, MangaType, AgeRating, FilterTaxonomy,
 } from "../../src/source";
 
-// Senkuro — Russian manga aggregator. GraphQL backend at
-// api.senkuro.com/graphql. DDoS-Guard at the edge — on 403, ask the
+// Senkuro — Russian manga aggregator. The site moved to senkuro.me; its
+// GraphQL backend is api.senkuro.me/graphql behind DDoS-Guard (the old
+// api.senkuro.com sits behind Cloudflare and answers 403 to some networks,
+// and senkuro.com only redirects to senkuro.me). On 403, ask the
 // native side to spin up a WKWebView, harvest cookies, and retry.
 
 const PAGE_SIZE = 30;
@@ -120,9 +122,9 @@ function sortField(s: string): string {
 class SenkuroSource implements Source {
   /// Subclasses (e.g. Senkognito) override this — same GraphQL schema,
   /// different host.
-  protected endpoint = "https://api.senkuro.com/graphql";
-  protected webHost  = "senkuro.com";
-  protected referer  = "https://senkuro.com/";
+  protected endpoint = "https://api.senkuro.me/graphql";
+  protected webHost  = "senkuro.me";
+  protected referer  = "https://senkuro.me/";
 
   // Cached DDoS-Guard cookie value, attached to every GraphQL request
   // once obtained. The native bridge can also persist cookies in
