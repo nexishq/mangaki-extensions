@@ -80,12 +80,12 @@
     {
       "id": "senkuro",
       "name": "Senkuro",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "language": "ru",
       "nsfw": false,
       "bundle": "sources/senkuro/source.js",
       "icon": "sources/senkuro/icon.png",
-      "baseURL": "https://senkuro.com",
+      "baseURL": "https://senkuro.me",
       "description": "Russian manga catalog with reader and library sync"
     }
   ]

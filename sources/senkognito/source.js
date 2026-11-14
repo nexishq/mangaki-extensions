@@ -128,9 +128,9 @@ var __source = (() => {
     constructor() {
       /// Subclasses (e.g. Senkognito) override this — same GraphQL schema,
       /// different host.
-      this.endpoint = "https://api.senkuro.com/graphql";
-      this.webHost = "senkuro.com";
-      this.referer = "https://senkuro.com/";
+      this.endpoint = "https://api.senkuro.me/graphql";
+      this.webHost = "senkuro.me";
+      this.referer = "https://senkuro.me/";
       // Cached DDoS-Guard cookie value, attached to every GraphQL request
       // once obtained. The native bridge can also persist cookies in
       // HTTPCookieStorage, but explicit pass-through avoids relying on that.
